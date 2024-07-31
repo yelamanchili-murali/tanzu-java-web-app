@@ -1,0 +1,47 @@
+name: Trigger auto deployment for aca-demoapp1
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/aca-demoapp1-AutoDeployTrigger-03ddf088-6fc1-4478-8ded-5557aa04812a.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.ACADEMOAPP1_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.ACADEMOAPP1_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.ACADEMOAPP1_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }} 
+          registryUrl: 
+          registryUsername: ${{ secrets.ACADEMOAPP1_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.ACADEMOAPP1_REGISTRY_PASSWORD }}
+          containerAppName: aca-demoapp1
+          resourceGroup: rg-aca
+          imageToBuild: default/[parameters('containerAppName')]:${{ github.sha }}
+          _buildArgumentsKey_: |
+            _buildArgumentsValues_
+
+
