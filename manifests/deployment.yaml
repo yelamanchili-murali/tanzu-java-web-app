@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-workflow
+  labels:
+    app: springboot-workflow
+    kubernetes.azure.com/generator: devhub
+  namespace: namespace-workflow-1722392899130
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: springboot-workflow
+  template:
+    metadata:
+      labels:
+        app: springboot-workflow
+    spec:
+      containers:
+        - name: springboot-workflow
+          image: acrworkflow1722392899130.azurecr.io/image-workflow-1722392899130:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
